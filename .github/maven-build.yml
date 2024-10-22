@@ -1,0 +1,33 @@
+name: Healthcare APIM Accelerator Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'main'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Locate ZIP file
+        id: locate_zip
+        run: echo "::set-output name=zipfile::$(find ./distribution/apim-accelerator/target -name '*.zip' | head -n 1)"
+
+      # Print the ZIP file path
+      - name: Print ZIP file path
+        run:  echo "ZIP file created at ${{ steps.locate_zip.outputs.zipfile }}"
