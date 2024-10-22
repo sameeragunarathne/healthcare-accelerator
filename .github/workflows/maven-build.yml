@@ -2,11 +2,7 @@ name: Healthcare APIM Accelerator Build and Release
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'main'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,3 +27,26 @@ jobs:
       # Print the ZIP file path
       - name: Print ZIP file path
         run:  echo "ZIP file created at ${{ steps.locate_zip.outputs.zipfile }}"
+
+      # Create a Pre-Release
+      - name: Create Pre-Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}  # Tag that triggered the workflow
+          release_name: "Healthcare APIM Accelerator - ${{ github.ref }}"
+          draft: false
+          prerelease: true
+
+      # Upload ZIP to Pre-Release
+      - name: Upload ZIP to Pre-Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.locate_zip.outputs.zipfile }}
+          asset_name: "wso2-hcam-accelerator-${{ github.ref }}.zip"
+          asset_content_type: application/zip
