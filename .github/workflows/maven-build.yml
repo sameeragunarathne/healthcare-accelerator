@@ -28,6 +28,15 @@ jobs:
       - name: Print ZIP file path
         run:  echo "ZIP file created at ${{ steps.locate_zip.outputs.zipfile }}"
 
+      # Automatically create a tag as "v{branch_name}"
+      - name: Create Tag
+        id: create_tag
+        run: |
+          TAG="v${{ github.event.inputs.branch }}"
+          git tag $TAG
+          git push origin $TAG
+          echo "::set-output name=tag::$TAG"        
+
       # Create a Pre-Release
       - name: Create Pre-Release
         id: create_release
